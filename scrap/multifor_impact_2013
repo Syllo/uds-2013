@@ -1,0 +1,3 @@
+multifor(index1,index1,... ; index1<expr1 , ... ; index1++, ... ; se passe tout les grain itteration ; commence à l'offset offset){
+    operations
+}
