@@ -34,7 +34,7 @@ void calc_multifor (){
     }
 }
 
-/* Dans ce cas on effectue les premiers calculs avant de recopier les valeurs, car si on a déjà calculé les deux premières lignes et colonnes les valeurs dans la première ligne ne sont plus utile pour la suite du calcule de la grille ce qui permet aux deux boucles de fonctionner en parallèle. Avec cet implémentation il n'est pas non plus nécessaire d'avoir une grille de même taille pour la temporaire mais une grille contenant (N-2)*3 suffit pour sauvegardé les données réellement utile ce qui fait qu'on gagne en espace mémoire.
+/* Dans ce cas on effectue les premiers calculs avant de recopier les valeurs, car si on a déjà calculé les deux premières lignes et colonnes les valeurs dans la première ligne ne sont plus utile pour la suite du calcule de la grille ce qui permet aux deux boucles de fonctionner en parallèle. Avec cet implémentation il n'est pas non plus nécessaire d'avoir une grille de même taille pour la temporaire mais une grille contenant (N-2)*4 suffit pour sauvegarder les données réellement utile ce qui fait que l'on gagne en espace mémoire.
  * */
 
 /* Décomposition pour compilation du multifor 
