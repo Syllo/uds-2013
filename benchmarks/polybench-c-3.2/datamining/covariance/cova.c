@@ -73,18 +73,17 @@ void kernel_covariance(int m, int n,
         mean[j] /= float_n;
     }
 
-    /* Center the column vectors. */
-    for (i = 0; i < _PB_N; i++)
-        for (j = 0; j < _PB_M; j++)
-            data[i][j] -= mean[j];
-
     /* Calculate the m * m covariance matrix. */
     for (j1 = 0; j1 < _PB_M; j1++)
         for (j2 = j1; j2 < _PB_M; j2++)
         {
             symmat[j1][j2] = 0.0;
-            for (i = 0; i < _PB_N; i++)
+            for (i = 0; i < _PB_N; i++){
+                if(j1==0){     /* Center the column vectors. */
+                    data[i][j2] -= mean[j2];
+                }
                 symmat[j1][j2] += data[i][j1] * data[i][j2];
+            }
             symmat[j2][j1] = symmat[j1][j2];
         }
 #pragma endscop

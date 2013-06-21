@@ -9,10 +9,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
-#include "DDV_API.h"
+#include "../../../utilities/DDV_API.h"
 
 /* Include polybench common header. */
-#include <polybench.h>
+#include <../../../utilities/polybench.h>
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 4000. */
@@ -63,7 +63,6 @@ void print_array(int ni, int nl,
         }
     fprintf (stderr, "\n");
 }
-
 
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
