@@ -76,56 +76,60 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
     int i, j, k;
 
 #pragma scop
-    multifor(i1=0, i2=0, i3=0; i1< _PB_NI, i2< _PB_NJ, i3< _PB_NI; i1++, i2++, i3++; 1, 1,1; 0, 0, 1){
-        multifor(j1=0, j2=0, j3=0; j1< _PB_NJ, j2< _PB_NL, j3< _PB_NL; j1++, j2++, j3++; 1, 1, 1; 0, 0, 1){
-            0:{
-                  E[i1][j1]=0;
-              }
-            1:{
-                  F[i2][j2]=0;
-              }
-            2:{
-                  G[i3][j3]=0;
-              }
-              multifor(k1=0, k2=0, k3=0; k1< _PB_NK, k2< _PB_NM, k3< _PB_NJ; k1++, k2++, k3++; 1, 1, 1; 0, 0, 0){
-                    0:{
-                          E[i1][j1]+= A[i1][k1]* B[k1][j1];
-                      }
-                    1:{
-                          F[i2][j2]+=C[i2][k2]*D[k2][j2];
-                      }
-                    2:{
-                          G[i3][j3]+=E[i3][k3]*F[k3][j3];
-                      }
-              }
+    /* E := A*B */
+    printf("digraph G {\n  rankdir=\"LR\";\n  edge[style=\"\",dir=\"forward\"];\n");
+    printf("subgraph cluster_1 {\n  style=filled;\n  fillcolor=lightgrey;\n  label = \"E=A*B\";\n");
+    for (i = 0; i < _PB_NI; i++)
+        for (j = 0; j < _PB_NJ; j++)
+        {
+            printf("node [pos=\"%d,%d!\" shape=point color=green height=0.2] a%da%d;\n",i,j,i,j);
         }
-    }
+    printf("}\n");
+    /* F := C*D */
+    printf("subgraph cluster_2 {\n  style=filled;\n  fillcolor=lightsalmon;\n  label = \"F=C*D\";\n");
+    for (i = 0; i < _PB_NJ; i++)
+        for (j = 0; j < _PB_NL; j++)
+        {
+            if(i<_PB_NI && j<_PB_NJ){
+                printf("node [pos=\"%d,%d!\" shape=point color=blue height=0.2] b%db%d;\n",i,j,i,j);
+            }
+            else{
+                printf("node [pos=\"%d,%d!\" shape=point color=turquoise height=0.2] b%db%d;\n",i,j,i,j);
+            }
+        }
+    printf("}\n");
+    /* G := E*F */
+    printf("subgraph cluster_3 {\n  style=filled;\n  fillcolor=lemonchiffon;\n  label = \"G=E*F\";\n");
+    for (i = 0; i < _PB_NI; i++)
+        for (j = 0; j < _PB_NL; j++)
+        {
+            if(i+1<_PB_NJ && i+1<_PB_NI && j+1<_PB_NJ && j+1 < _PB_NL){
+                printf("node [pos=\"%d,%d!\" shape=point color=purple height=0.2] c%dc%d;\n",i+1,j+1,i,j);
+            }
+            else{
+                if(i+1>=_PB_NJ && i+1<_PB_NI && j+1<_PB_NJ || j+1>=_PB_NL && j+1<_PB_NJ && i+1<_PB_NI){
+                    printf("node [pos=\"%d,%d!\" shape=point color=yellow height=0.2] c%dc%d;\n",i+1,j+1,i,j);
+                }
+                else{
+                    if(i+1<_PB_NJ && i+1>=_PB_NI && j+1<_PB_NL || j+1>=_PB_NJ && j+1<_PB_NL && i+1<_PB_NJ){
+                    printf("node [pos=\"%d,%d!\" shape=point color=darkorange height=0.2] c%dc%d;\n",i+1,j+1,i,j);
+                    }
+                    else{
+                    printf("node [pos=\"%d,%d!\" shape=point color=maroon height=0.2] c%dc%d;\n",i+1,j+1,i,j);
+                    }
+                }
 
-
-//source code        /* E := A*B */
-//source code        for (i = 0; i < _PB_NI; i++)
-//source code            for (j = 0; j < _PB_NJ; j++)
-//source code            {
-//source code                E[i][j] = 0;
-//source code                for (k = 0; k < _PB_NK; ++k)
-//source code                    E[i][j] += A[i][k] * B[k][j];
-//source code            }
-//source code        /* F := C*D */
-//source code        for (i = 0; i < _PB_NJ; i++)
-//source code            for (j = 0; j < _PB_NL; j++)
-//source code            {
-//source code                F[i][j] = 0;
-//source code                for (k = 0; k < _PB_NM; ++k)
-//source code                    F[i][j] += C[i][k] * D[k][j];
-//source code            }
-//source code        /* G := E*F */
-//source code        for (i = 0; i < _PB_NI; i++)
-//source code            for (j = 0; j < _PB_NL; j++)
-//source code            {
-//source code                G[i][j] = 0;
-//source code                for (k = 0; k < _PB_NJ; ++k)
-//source code                    G[i][j] += E[i][k] * F[k][j];
-//source code            }
+            }
+        }
+    printf("}\n");
+      printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=maroon ];\nG\n",0,-1,0,-1);
+      printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=green ];\nE\n",1,-1,1,-1);
+      printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=turquoise ];\nF\n",2,-1,2,-1);
+printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=darkorange ];\n\"G+F\"\n",3,-1,3,-1);
+printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=yellow ];\n\"G+E\"\n",4,-1,4,-1);
+printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=purple ];\n\"G+E+F\"\n",5,-1,5,-1);
+printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=blue ];\n\"E+F\"\n",6,-1,6,-1);
+    printf("}\n");
 #pragma endscop
 
 }

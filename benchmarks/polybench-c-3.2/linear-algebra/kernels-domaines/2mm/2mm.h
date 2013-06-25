@@ -24,10 +24,10 @@
 #  endif
 
 #  ifdef SMALL_DATASET
-#   define NI 128
-#   define NJ 128
-#   define NK 128
-#   define NL 128
+#   define NI 15
+#   define NJ 15
+#   define NK 15
+#   define NL 15
 #  endif
 
 #  ifdef STANDARD_DATASET /* Default if unspecified. */

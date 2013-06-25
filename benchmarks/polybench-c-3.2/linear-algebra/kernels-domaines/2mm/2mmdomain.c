@@ -87,18 +87,19 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
 
     printf("digraph G {\n  rankdir=\"LR\";\n  edge[style=\"\",dir=\"forward\"];\n");
 
-    SUB_CLUST(1)
         /* D := alpha*A*B*C + beta*D */
         for (i = 0; i < _PB_NI; i++)
             for (j = 0; j < _PB_NJ; j++)
             {
                 tmp[i][j] = 0;
 #ifdef dom_a
-                printf("node [pos=\"%d,%d!\" shape=point color=red height=0.2] a%da%d;\n",i,j,i,j);
-                printf("edge[style=\"invisible\" dir=\"none\"];\n");
-                printf("edge[style=\"\" dir=\"forward\"];\n");
-                printf("edge[color=red];\n");
-                DDV_FUSE(i,j,i,j,'a','p',1)
+                if(i==0){
+                    printf("node [pos=\"%d,%d!\" shape=point color=red height=0.2] a%da%d;\n",i,j,i,j);
+                }
+                else{
+                    printf("node [pos=\"%d,%d!\" shape=point ] a%da%d;\n",i,j,i,j);
+                }
+
 #endif
                     for (k = 0; k < _PB_NK; ++k)
                     {
@@ -108,8 +109,6 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
                         //tmp[i][j] += alpha * A[i][k] * B[k][j];
                     }
             }
-    printf("}\n");
-    SUB_CLUST(2)
         for (i = 0; i < _PB_NI; i++)
             for (j = 0; j < _PB_NL; j++)
             {
@@ -117,16 +116,16 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
                 for (k = 0; k < _PB_NJ; ++k)
                 {
 #ifdef dom_b
-                    printf("node [pos=\"%d,%d!\" shape=point color=green height=0.2] b%db%d;\n",i+_PB_NI-1,j+_PB_NL,i,j);
-                    printf("edge[style=\"invisible\" dir=\"none\"];\n");
-                    printf("edge[style=\"\" dir=\"forward\"];\n");
-                    printf("edge[color=blue];\n");
-                    DDV_FUSE(i,j,i,k,'b','p',0)
+                    if(i<_PB_NJ-1){
+                        printf("node [pos=\"%d,%d!\" shape=point color=purple height=0.2] b%db%d;\n",i+1,j,i,j);
+                    }
+                    else{
+                        printf("node [pos=\"%d,%d!\" shape=point color=blue height=0.2] b%db%d;\n",i+1,j,i,j);
+                    }
 #endif
                     //D[i][j] += tmp[i][k] * C[k][j];
                 }
             }
-    printf("}\n");
 
     printf("}\n");
 #pragma endscop
