@@ -9,7 +9,6 @@ image_gen_view : 3mm.c 3mm.h ../../../utilities/polybench.h
 3mmdomain : 3mmdomain.c 3mm.h
 	gcc -O3 -I utilities -I../../../utilities/ ../../../utilities/polybench.c 3mmdomain.c -o 3mmdomain_dom -std=gnu99 -DSMALL_DATASET
 	./3mmdomain_dom > hello
-	#../../../utilities/supdoub
 	neato -Tsvg hello -o pic.svg
 	rm hello 3mmdomain_dom
 	eog pic.svg&
