@@ -1,0 +1,30 @@
+L1: for(k=0; k< _PB_N; k++){
+L2:     for(j=k+1; j< _PB_N; j++){
+S1:         A[k][j] := A[k][j] / A[k][k];   // la partie L
+        }
+L3:     for(i=k+1; i<_PB_N; i++){
+L4:         for(j=k+1; j< _PB_N; j++){
+S2:             A[i][j] := A[i][j] - A[i][k] * A[k][j]; // la partie U
+            }
+        }
+    }
+
+pour S1 on a un vecteur alpha[k,j]
+pour S2 on a un vecteur beta[k,i,j]
+
+On voit bien ici la dépendance entre S1 et S2 car lors d'une itération S2 A[i][j] écrit et lit en A[k+1..N][k+1..N] puis lors de la prochaine itération S1 écrit et lit dans A[k+1..N][k+2..N]. Il y a donc dépendance de flot lors de la deuxième itération.
+
+On voit aussi qu'il est facile de découper en ligne ou colonne et de faire effectué les deux opérations en séquentiel pour chaque partie découpée. (ici ils écrivent sur A pour calculer L puis réécrivent dessus pour U mais dans le papier de hier ils ont une autre matrice pour stocker L pour éviter les données seraient écrasé comme ici)
+
+ils ont l'algo suivant:
+
+L1: for(k=0; k<_PB_N; k++){
+L3:     for(i>k from each tread){
+            L[i][k]=A[i][k]/A[k][k];
+L4:         for(j=k+1; j< _PB_N; j++){
+S2:             A[i][j] := A[i][j] - L[i][k] * A[k][j]; // la partie U
+            }
+        }
+    }
+
+Plus la recherche du déterminant et l'échange de ligne ou colonne mais non essentiel ici car le pivot est celui sur la diagonale par défaut.

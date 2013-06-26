@@ -25,8 +25,8 @@
 #  endif
 
 #  ifdef SMALL_DATASET
-#   define NI 16
-#   define NJ 11
+#   define NI 8
+#   define NJ 10
 #   define NK 13
 #   define NL 8
 #   define NM 22

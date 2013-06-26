@@ -78,7 +78,7 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
 #pragma scop
     /* E := A*B */
     printf("digraph G {\n  rankdir=\"LR\";\n  edge[style=\"\",dir=\"forward\"];\n");
-    printf("subgraph cluster_1 {\n  style=filled;\n  fillcolor=lightgrey;\n  label = \"E=A*B\";\n");
+    printf("subgraph cluster_1 {\n  style=filled;\n  fillcolor=seagreen1;\n  label = \"E=A*B\";\n");
     for (i = 0; i < _PB_NI; i++)
         for (j = 0; j < _PB_NJ; j++)
         {
@@ -86,25 +86,25 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
         }
     printf("}\n");
     /* F := C*D */
-    printf("subgraph cluster_2 {\n  style=filled;\n  fillcolor=lightsalmon;\n  label = \"F=C*D\";\n");
+    printf("subgraph cluster_2 {\n  style=filled;\n  fillcolor=royalblue1;\n  label = \"F=C*D\";\n");
     for (i = 0; i < _PB_NJ; i++)
         for (j = 0; j < _PB_NL; j++)
         {
             if(i<_PB_NI && j<_PB_NJ){
-                printf("node [pos=\"%d,%d!\" shape=point color=blue height=0.2] b%db%d;\n",i,j,i,j);
+                printf("node [pos=\"%d,%d!\" shape=point color=cyan height=0.2] b%db%d;\n",i,j,i,j);
             }
             else{
-                printf("node [pos=\"%d,%d!\" shape=point color=turquoise height=0.2] b%db%d;\n",i,j,i,j);
+                printf("node [pos=\"%d,%d!\" shape=point color=blue height=0.2] b%db%d;\n",i,j,i,j);
             }
         }
     printf("}\n");
     /* G := E*F */
-    printf("subgraph cluster_3 {\n  style=filled;\n  fillcolor=lemonchiffon;\n  label = \"G=E*F\";\n");
+    printf("subgraph cluster_3 {\n  style=filled;\n  fillcolor=lightpink2;\n  label = \"G=E*F\";\n");
     for (i = 0; i < _PB_NI; i++)
         for (j = 0; j < _PB_NL; j++)
         {
             if(i+1<_PB_NJ && i+1<_PB_NI && j+1<_PB_NJ && j+1 < _PB_NL){
-                printf("node [pos=\"%d,%d!\" shape=point color=purple height=0.2] c%dc%d;\n",i+1,j+1,i,j);
+                printf("node [pos=\"%d,%d!\" shape=point color=white height=0.2] c%dc%d;\n",i+1,j+1,i,j);
             }
             else{
                 if(i+1>=_PB_NJ && i+1<_PB_NI && j+1<_PB_NJ || j+1>=_PB_NL && j+1<_PB_NJ && i+1<_PB_NI){
@@ -112,23 +112,23 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
                 }
                 else{
                     if(i+1<_PB_NJ && i+1>=_PB_NI && j+1<_PB_NL || j+1>=_PB_NJ && j+1<_PB_NL && i+1<_PB_NJ){
-                    printf("node [pos=\"%d,%d!\" shape=point color=darkorange height=0.2] c%dc%d;\n",i+1,j+1,i,j);
+                    printf("node [pos=\"%d,%d!\" shape=point color=purple height=0.2] c%dc%d;\n",i+1,j+1,i,j);
                     }
                     else{
-                    printf("node [pos=\"%d,%d!\" shape=point color=maroon height=0.2] c%dc%d;\n",i+1,j+1,i,j);
+                    printf("node [pos=\"%d,%d!\" shape=point color=red height=0.2] c%dc%d;\n",i+1,j+1,i,j);
                     }
                 }
 
             }
-        }
+       }
     printf("}\n");
-      printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=maroon ];\nG\n",0,-1,0,-1);
+      printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=red ];\nG\n",0,-1,0,-1);
       printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=green ];\nE\n",1,-1,1,-1);
-      printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=turquoise ];\nF\n",2,-1,2,-1);
-printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=darkorange ];\n\"G+F\"\n",3,-1,3,-1);
+      printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=blue ];\nF\n",2,-1,2,-1);
+printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=purple ];\n\"G+F\"\n",3,-1,3,-1);
 printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=yellow ];\n\"G+E\"\n",4,-1,4,-1);
-printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=purple ];\n\"G+E+F\"\n",5,-1,5,-1);
-printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=blue ];\n\"E+F\"\n",6,-1,6,-1);
+printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=white ];\n\"G+E+F\"\n",5,-1,5,-1);
+printf("node [shape=box,style=filled,pos=\"%d,%d!\", color=cyan ];\n\"E+F\"\n",6,-1,6,-1);
     printf("}\n");
 #pragma endscop
 
