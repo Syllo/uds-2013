@@ -49,11 +49,18 @@ void print_array(int n,
 }
 
 
-static inline void decompoLu(int k, int i){
+static inline void decompoLu(int nbr, int k, int i, DATA_TYPE POLYBENCH_2D(A,N,N,n,n)){
     A[i][k]=A[i][k]/A[k][k];
-    for(int j=0; j<_PB_N; j++){
+    int j;
+    for(j=0; j<nbr; j++){
         A[i][j]=A[i][j]-A[i][j]*A[k][j];
     }
+}
+static inline int min(int a, int b){
+    return a<b ? a : b;
+}
+static inline int max(int a, int b){
+    return a>b ? a : b;
 }
 
 /* Main computational kernel. The whole function will be timed,
@@ -62,37 +69,41 @@ static inline void decompoLu(int k, int i){
 void kernel_lu(int n,
         DATA_TYPE POLYBENCH_2D(A,N,N,n,n))
 {
-    int i, j, k;
+    int i0, i1, i2, k;
 #pragma scop
 
-    multifor(k=0; k<_PB_N; k++; 1; 0){
-        multifor(i0=0, i1=_PB_N/3, i2=2*_PB_N/3; i0<_PB_N/3 && k<_PB_N/3, i1<2*_PB_N/3 && k<2*_PB_N/3, i2<_PB_N; i0++, i1++, i2++; 1 ,1 ,1; 0,0,0)
+    for(k=0; k<_PB_N; k++){
+       
+        //multifor(i0=0, i1=_PB_N/3, i2=2*_PB_N/3; i0<_PB_N/3 && k<_PB_N/3, i1<2*_PB_N/3 && k<2*_PB_N/3, i2<_PB_N; i0++, i1++, i2++; 1 ,1 ,1; 0,0,0){
+       
+       
+       multifor(i0=0, i1=42, i2=84; i0<42 /*&& k<42*/, i1<84/* && k<84*/, i2<128; i0++, i1++, i2++; 1 ,1 ,1; 0,0,0){
 0:{ //intervalle 0 .._NB_N /3 -1
       if(i0>k){ // le pivot
-        decompoLu(k,i0);
+          decompoLu(_PB_N, k, i0, A);
       }
   }
 1:{ //intervalle _NB_N/3 .. _2*NB_N/3-1
       if(i1>k){ // le pivot
-          decompoLu(k,i1);
+          decompoLu(_PB_N , k, i1, A);
       }
   }
 2:{ // intervalle 2*_PB_N/3 .. _PB_N-1
       if(i2>k){  // le pivot
-          decompoLu(k,i2);
+          decompoLu(_PB_N, k, i2, A);
       }
   }
         }
     }
 
- //source code   for (k = 0; k < _PB_N; k++)
- //source code   {
- //source code       for (j = k + 1; j < _PB_N; j++)
- //source code           A[k][j] = A[k][j] / A[k][k];
- //source code       for(i = k + 1; i < _PB_N; i++)
- //source code           for (j = k + 1; j < _PB_N; j++)
- //source code               A[i][j] = A[i][j] - A[i][k] * A[k][j];
- //source code   }
+    //source code   for (k = 0; k < _PB_N; k++)
+    //source code   {
+    //source code       for (j = k + 1; j < _PB_N; j++)
+    //source code           A[k][j] = A[k][j] / A[k][k];
+    //source code       for(i = k + 1; i < _PB_N; i++)
+    //source code           for (j = k + 1; j < _PB_N; j++)
+    //source code               A[i][j] = A[i][j] - A[i][k] * A[k][j];
+    //source code   }
 #pragma endscop
 }
 

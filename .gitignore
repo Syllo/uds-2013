@@ -1,3 +1,6 @@
 *.swp
 *.tags
 *_tim
+*.svg
+*IBB.c
+IBB

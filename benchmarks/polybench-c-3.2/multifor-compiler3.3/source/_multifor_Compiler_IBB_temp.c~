@@ -1,0 +1,16 @@
+for (_mfr_ref0=N;_mfr_ref0<=min(-1,N+5);_mfr_ref0++) {
+  S1(_mfr_ref0);
+}
+for (_mfr_ref0=0;_mfr_ref0<=min(5,N-1);_mfr_ref0++) {//************
+  S2(_mfr_ref0);
+}
+for (_mfr_ref0=max(0,N);_mfr_ref0<=min(5,N+5);_mfr_ref0++) {//************
+  S1(_mfr_ref0);
+  S2(_mfr_ref0);
+}
+for (_mfr_ref0=max(6,N);_mfr_ref0<=N+5;_mfr_ref0++) {
+  S1(_mfr_ref0);
+}
+for (_mfr_ref0=max(0,N+6);_mfr_ref0<=5;_mfr_ref0++) {
+  S2(_mfr_ref0);
+}

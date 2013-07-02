@@ -59,8 +59,12 @@ void print_array(int ni, int nl,
         }
     fprintf (stderr, "\n");
 }
-
-
+static inline int min(int a, int b){
+    return a<b ? a: b;
+}
+static inline int max(int a, int b){
+    return a>b ? a : b;
+}
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
     static
@@ -73,7 +77,7 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
         DATA_TYPE POLYBENCH_2D(D,NM,NL,nm,nl),
         DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
 {
-    int i, j, k;
+    int i1, i2, i3, j1, j2, j3, k1, k2, k3;
 
 #pragma scop
     multifor(i1=0, i2=0, i3=0; i1< _PB_NI, i2< _PB_NJ, i3< _PB_NI; i1++, i2++, i3++; 1, 1,1; 0, 0, 1){

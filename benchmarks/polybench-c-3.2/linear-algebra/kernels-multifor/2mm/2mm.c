@@ -63,6 +63,9 @@ void print_array(int ni, int nl,
     fprintf (stderr, "\n");
 }
 
+static inline int min (int a, int b){
+    return a<b ? a : b;
+}
 
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
@@ -76,27 +79,27 @@ void kernel_2mm(int ni, int nj, int nk, int nl,
         DATA_TYPE POLYBENCH_2D(C,NL,NJ,nl,nj),
         DATA_TYPE POLYBENCH_2D(D,NI,NL,ni,nl))
 {
-    int i, j, k;
+    int i1, i2, j1, j2, k1, k2;
 
 #pragma scop
     /* D := alpha*A*B*C + beta*D */
     multifor(i1=0, i2=0; i1< _PB_NI, i2< _PB_NI; i1++, i2++; 1, 1; 0, 1){
-    multifor(j1=0, j2=0; j1< _PB_NJ, j2< _PB_NL; j1++, j2++; 1, 1; 0, 0){
-        0:{
-            tmp[i1][j1]=0;
-          }
-        1:{
-            D[i2][j2]*=beta;
-          }
-        multifor(k1=0, k2=0; k1< _PB_NK, k2< _PB_NJ; k1++, k2++; 1, 1; 0, 0){
-            0:{
-                tmp[i1][j1]+=alpha* A[i1][k1]* B[k1][j1];
-            }
-            1:{
-                D[i2][j2]+= tmp[i2][k2] * C[k2][j2];
-            }
+        multifor(j1=0, j2=0; j1< _PB_NJ, j2< _PB_NL; j1++, j2++; 1, 1; 0, 0){
+0:{
+      tmp[i1][j1]=0;
+  }
+1:{
+      D[i2][j2]*=beta;
+  }
+  multifor(k1=0, k2=0; k1< _PB_NK, k2< _PB_NJ; k1++, k2++; 1, 1; 0, 0){
+0:{
+      tmp[i1][j1]+=alpha* A[i1][k1]* B[k1][j1];
+  }
+1:{
+      D[i2][j2]+= tmp[i2][k2] * C[k2][j2];
+  }
+  }
         }
-    }
     }
 
     // source code                for (i = 0; i < _PB_NI; i++)
@@ -157,7 +160,7 @@ int main(int argc, char** argv)
     /* Stop and print timer. */
     polybench_stop_instruments;
     polybench_print_instruments;
-
+    print_array(ni,nl,POLYBENCH_ARRAY(D));
     /* Prevent dead-code elimination. All live-out data must be printed
        by the function call in argument. */
     polybench_prevent_dce(print_array(ni, nl,  POLYBENCH_ARRAY(D)));

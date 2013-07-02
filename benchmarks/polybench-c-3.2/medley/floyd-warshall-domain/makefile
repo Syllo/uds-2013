@@ -4,6 +4,3 @@ floyd-warshalldomain : floyd-warshall.c floyd-warshall.h
 
 clean :
 	for i in `seq $(NOMBRE)`;do rm pic$$i.svg; done
-
-hjkl:
-	for i in `seq 3`; do ls &; done
