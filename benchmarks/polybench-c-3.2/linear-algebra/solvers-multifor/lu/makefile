@@ -3,9 +3,9 @@ lu-IBB.c : lu.c ../../../IBB
 ../../../IBB :
 	@ (cd ../../../multifor-compiler3.3/source; make)
 lumulti : lu-IBB.c lu.h
-	gcc -O3 -I ../../../utilities -I. ../../../utilities/polybench.c lu-IBB.c -DPOLYBENCH_TIME -DSMALL_DATASET -o lumulti
+	gcc -O3 -D __PRINT -I ../../../utilities -I. ../../../utilities/polybench.c lu-IBB.c -DPOLYBENCH_TIME -DMINI_DATASET -o lumulti
 lu : ../../solvers/lu/lu.c lu.h
-	gcc -O3 -I ../../../utilities -I. ../../../utilities/polybench.c ../../solvers/lu/lu.c -DPOLYBENCH_TIME -o lu -DSMALL_DATASET
+	gcc -O3 -D __PRINT -I ../../../utilities -I. ../../../utilities/polybench.c ../../solvers/lu/lu.c -DPOLYBENCH_TIME -o lu -DMINI_DATASET
 clean:
 	rm lumulti lu lu-IBB.c
 test:  lumulti lu

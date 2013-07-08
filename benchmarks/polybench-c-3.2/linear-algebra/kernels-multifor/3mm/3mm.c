@@ -77,34 +77,70 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
         DATA_TYPE POLYBENCH_2D(D,NM,NL,nm,nl),
         DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
 {
-    int i1, i2, i3, j1, j2, j3, k1, k2, k3;
+    int i1, i2, i3, j1, j2, j3, k1, k2, k3, nb_row_G;
 
 #pragma scop
-    multifor(i1=0, i2=0, i3=0; i1< _PB_NI, i2< _PB_NJ, i3< _PB_NI; i1++, i2++, i3++; 1, 1,1; 0, 0, 1){
-        multifor(j1=0, j2=0, j3=0; j1< _PB_NJ, j2< _PB_NL, j3< _PB_NL; j1++, j2++, j3++; 1, 1, 1; 0, 0, 1){
-            0:{
-                  E[i1][j1]=0;
-              }
-            1:{
-                  F[i2][j2]=0;
-              }
-            2:{
-                  G[i3][j3]=0;
-              }
-              multifor(k1=0, k2=0, k3=0; k1< _PB_NK, k2< _PB_NM, k3< _PB_NJ; k1++, k2++, k3++; 1, 1, 1; 0, 0, 0){
-                    0:{
-                          E[i1][j1]+= A[i1][k1]* B[k1][j1];
-                      }
-                    1:{
-                          F[i2][j2]+=C[i2][k2]*D[k2][j2];
-                      }
-                    2:{
-                          G[i3][j3]+=E[i3][k3]*F[k3][j3];
-                      }
-              }
+    multifor(i1=0, i2=0, i3=0, i4=0; i1< _PB_NI, i2< _PB_NJ, i3< _PB_N, i4 < _PB_N; i1++, i2++, i3++, i4++; 1, 1, 1, 1; 0, 0, 1, 1){
+        multifor(j1=0, j2=0, j3=0,j4=0; j1 < _PB_NJ, j2<_PB_NL, j3<_PB_NL, j4<_PB_NL; j1++, j2++, j3++, j4++; 1, 1, 1, 1; 0, 0, 1, 1){
+0:{
+      E[i1][j1]=0;
+  }
+1:{
+      F[i2][j2]=0;
+  }
+2:{
+      G[i3][j3]=0;
+  }
+3:{
+      G[i4][j4]=0;
+  }
+  multifor(k1=0, k2=0, k3=0,k4=0; k1 < _PB_NK, k2<_PB_NM, k3<_PB_NJ, k4<_PB_NJ; k1++, k2++, k3++, k4++; 1, 1, 1, 1; 0, 0, 0, 0){
+0:{
+      E[i1][j1]=A[i1][k1]*B[k1][j1];
+  }
+1:{
+      F[i2][j2]=C[i2][k2]*D[k2][j2];
+  }
+2:{
+      G[i3][j3]=E[i3][k3]*F[k3][j3];
+  }
+3:{
+      G[i4][j4]=E[i4][k4]*F[k4][j4];
+  }
+  }
         }
     }
+}
+//  multifor(i1=0, j2=0, nb_row_G=0; i1< _PB_NI, j2< _PB_NL, nb_row_G < _PB_NI; i1++, j2++, nb_row_G++; 1, 1,1; 0, 0, 1){
+//      multifor(j1=0, i2=0, i3=0; j1< _PB_NJ, i2< _PB_NJ, i3< i1; j1++, i2++, i3++; 1, 1, 1; 0, 0, 0){
+//          0:{
+//                E[i1][j1]=0;
+//            }
+//          1:{
+//                F[i2][j2]=0;
+//            }
+//            multifor(k1=0, k2=0, j3=0; k1< _PB_NK, k2< _PB_NM, j3 < j2; k1++, k2++, j3++; 1, 1, 1; 0, 0, 0){
+//                  0:{
+//                        E[i1][j1]+= A[i1][k1] * B[k1][j1];
+//                    }
+//                  1:{
+//                        F[i2][j2]+= C[i2][k2] * D[k2][j2];
+//                    }
+//                  2:{
+//                        if(i3 < i1-1){
+//                            j3=j2-1;
+//                        }
+//                        G[i3][j3]=0;
+//                        for(k3=0; k3 < _PB_NJ; k3++){
 
+//                              G[i3][j3]+=E[i3][k3]*F[k3][j3];
+//                              if(j3==3)
+//                            printf("nb_row:%d i1:%d j2:%d i3:%d j3:%d k3:%d valG %f valE %f valF %f\n",nb_row_G,i1,j2,i3,j3,k3,G[i3][j3],E[i3][k3], F[k3][j3]);
+//                        }
+//                    }
+//            }
+//      }
+//  }
 
 //source code        /* E := A*B */
 //source code        for (i = 0; i < _PB_NI; i++)
@@ -176,7 +212,9 @@ int main(int argc, char** argv)
     /* Stop and print timer. */
     polybench_stop_instruments;
     polybench_print_instruments;
-
+#ifdef __PRINT
+    print_array(ni,nl,POLYBENCH_ARRAY(G));
+#endif
     /* Prevent dead-code elimination. All live-out data must be printed
        by the function call in argument. */
     polybench_prevent_dce(print_array(ni, nl,  POLYBENCH_ARRAY(G)));
