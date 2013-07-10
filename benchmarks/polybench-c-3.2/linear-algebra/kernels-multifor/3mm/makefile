@@ -3,9 +3,9 @@
 ../../../IBB :
 	@ (cd ../../../multifor-compiler3.3/source; make)
 3mmmulti : 3mm-IBB.c 3mm.h
-	gcc -g -I ../../../utilities -I. ../../../utilities/polybench.c 3mm-IBB.c -DPOLYBENCH_TIME -o 3mmmulti -DSMALL_DATASET -D __PRINT
+	gcc -std=c99 -Wall -g -I ../../../utilities -I. ../../../utilities/polybench.c 3mm-IBB.c -DPOLYBENCH_TIME -o 3mmmulti -DSMALL_DATASET -D __PRINT
 3mm : ../../kernels/3mm/3mm.c 3mm.h
-	gcc -g -I ../../../utilities -I. ../../../utilities/polybench.c ../../kernels/3mm/3mm.c -DPOLYBENCH_TIME -o 3mm -DSMALL_DATASET -D __PRINT
+	gcc -std=c99 -Wall -g -I ../../../utilities -I. ../../../utilities/polybench.c ../../kernels/3mm/3mm.c -DPOLYBENCH_TIME -o 3mm -DSMALL_DATASET -D __PRINT
 clean:
 	rm 3mmmulti 3mm 3mm-IBB.c
 test: 3mmmulti 3mm
