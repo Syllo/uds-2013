@@ -64,15 +64,24 @@ static inline int min(int a, int b){
 static inline int max(int a, int b){
     return a>b ? a : b;
 }
-static inline void calculatation(int i, int _PB_NI, DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl),DATA_TYPE POLYBENCH_2D(E,NI,NJ,ni,nj),DATA_TYPE POLYBENCH_2D(F,NJ,NL,nj,nl)){
+
+/**
+ * Sert au calcul de la matrice G qui est coupé en deux selon la diagonale, faisant deux matrices triangulaire.
+ * Si boulien est égale à 0 calcul de la partie supérieure (qui doit être plié avec un grain de -1 ou calculé après que E et F soient entièrement calculé) et sinon la partie inférieure.
+ * */
+
+static inline void calculatation(int i, int _PB_NI, 
+        DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl),
+        DATA_TYPE POLYBENCH_2D(E,NI,NJ,ni,nj),
+        DATA_TYPE POLYBENCH_2D(F,NJ,NL,nj,nl),
+        int boulien){
     for(int ibis=i, jbis=-i; jbis<-i+_PB_NI; ibis++, jbis++){
-        if(jbis<=0){
-            printf("ibis%d jbis%d\n",(ibis-jbis)/2,(ibis+jbis)/2);
-            G[(ibis-jbis)/2][(ibis+jbis)/2]=0;
+        int ibase=(ibis-jbis)/2, jbase=(ibis+jbis)/2;
+        if( boulien!=0 ? jbis<=0 : jbis>0){
+            G[ibase][jbase]=0;
             for(int k=0; k<_PB_NI; k++){
-                G[(ibis-jbis)/2][(ibis+jbis)/2]+=E[(ibis-jbis)/2][k]* F[k][(ibis+jbis)/2];
+                G[ibase][jbase]+=E[ibase][k]* F[k][jbase];
             }
-            printf("I: %d G[%d][%d]= %f\n",i,(ibis-jbis)/2,(ibis+jbis)/2,G[(ibis-jbis)/2][(ibis+jbis)/2]);
         }
     }
 }
@@ -91,25 +100,26 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
     int i1, i2, i4, i3, j1, j2, k1, k2;
 
 #pragma scop
-    multifor(i1=0, i2=0, i3=0, i4=0; i1<4, i2<4, i3<4, i4<4; i1++, i2++, i3++, i4++; 1, 1, 1, 1; 0, 0, 1, 1){
-2:{printf("");
+    multifor(i1=0, i2=0, i3=0, i4=0; i1<4, i2<4, i3<4, i4<4; i1++, i2++, i3++, i4++; 1, 1, 1, 1; 0, 0, 4, 1){
+2:{
+      calculatation(i3,_PB_NI,G,E,F,0); //calcul de la matrice supérieure avec un grain de -1 pour plier le domaine
   }
 3:{
-      calculatation(i4,_PB_NI,G,E,F);
+      calculatation(i4,_PB_NI,G,E,F,1); //calcul de la matrice inférieure
   }
   multifor(j1=0, j2=0; j1 < 4, j2<4; j1++, j2++;1, 1; 0, 0){
 0:{
       E[i1][j1]=0;
   }
 1:{
-      F[i2][j2]=0;
+      F[j2][i2]=0;
   }
   multifor(k1=0, k2=0; k1 < 4, k2<4; k1++, k2++; 1, 1; 0, 0){
 0:{
-      E[i1][j1]=A[i1][k1]*B[k1][j1];
+      E[i1][j1]+=A[i1][k1]*B[k1][j1];
   }
 1:{
-      F[i2][j2]=C[i2][k2]*D[k2][j2];
+      F[j2][i2]+=C[j2][k2]*D[k2][i2];
   }
   }
   }
