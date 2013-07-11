@@ -160,7 +160,9 @@ int main(int argc, char** argv)
     /* Stop and print timer. */
     polybench_stop_instruments;
     polybench_print_instruments;
+#ifdef __PRINT
     print_array(ni,nl,POLYBENCH_ARRAY(D));
+#endif
     /* Prevent dead-code elimination. All live-out data must be printed
        by the function call in argument. */
     polybench_prevent_dce(print_array(ni, nl,  POLYBENCH_ARRAY(D)));

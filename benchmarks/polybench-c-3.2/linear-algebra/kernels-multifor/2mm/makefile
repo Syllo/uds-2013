@@ -3,7 +3,7 @@
 ../../../IBB :
 	@ cd ../../../multifor-compiler3.3/source; make
 2mmmulti : 2mm-IBB.c 2mm.h
-	gcc -O3 -I ../../../utilities -I. ../../../utilities/polybench.c 2mm-IBB.c -DPOLYBENCH_TIME -o 2mmmulti -DSMALL_DATASET
+	gcc -O3 -I ../../../utilities -I. ../../../utilities/polybench.c 2mm-IBB.c -DPOLYBENCH_TIME -o 2mmmulti -DSMALL_DATASET -D __PRINT
 2mm : ../../kernels/2mm/2mm.c 2mm.h
 	gcc -O3 -I ../../../utilities -I. ../../../utilities/polybench.c ../../kernels/2mm/2mm.c -DPOLYBENCH_TIME -o 2mm -DSMALL_DATASET -D __PRINT
 clean:
@@ -11,6 +11,6 @@ clean:
 test: 2mmmulti 2mm
 	@./2mm 2> __2mm
 	@./2mmmulti 2> __2mmulti
-	@if diff __2mm __2mmulti > __diff;then echo ' '; fi
+	@if diff __2mm __2mmulti > __diff;then echo ''; fi
 	@if ! test -s __diff; then echo Les valeurs en sortie sont les mêmes; else echo Les valeurs en sortie divergent; fi
 	@rm __2mm __2mmulti __diff
