@@ -22,8 +22,9 @@ endif
 clean:
 	rm 2mmmulti 2mm 2mm-IBB.c 2mm.pocc 2mm.openmp
 
-cleanall : clean
+cleanall :
 	rm ./-D*
+	make clean
 
 2mm.pocc : 2mm.pocc.c 2mm.h
 	$(CC) $(OPTI) $(OMP) $(INCLUDE) $(TIMER) $(DATASET) ../../../utilities/polybench.c 2mm.pocc.c -o 2mm.pocc
