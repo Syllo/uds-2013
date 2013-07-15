@@ -100,21 +100,21 @@ void kernel_3mm(int ni, int nj, int nk, int nl, int nm,
     int i1, i2, i4, i3, j1, j2, k1, k2;
 
 #pragma scop
-    multifor(i1=0, i2=0, i3=0, i4=0; i1<1024, i2<1024, i3<1024, i4<1024; i1++, i2++, i3++, i4++; 1, 1, 1, 1; 0, 0, 1024, 1){
+    multifor(i1=0, i2=0, i3=0, i4=0; i1<_PB_NI, i2<_PB_NI, i3<_PB_NI, i4<_PB_NI; i1++, i2++, i3++, i4++; 1, 1, 1, 1; 0, 0, _PB_NI, 1){
 2:{
       calculatation(i3,_PB_NI,G,E,F,0); //calcul de la matrice supérieure avec un grain de -1 pour plier le domaine
   }
 3:{
       calculatation(i4,_PB_NI,G,E,F,1); //calcul de la matrice inférieure
   }
-  multifor(j1=0, j2=0; j1 < 1024, j2<1024; j1++, j2++;1, 1; 0, 0){
+  multifor(j1=0, j2=0; j1 < _PB_NI, j2<_PB_NI; j1++, j2++;1, 1; 0, 0){
 0:{
       E[i1][j1]=0;
   }
 1:{
       F[j2][i2]=0;
   }
-  multifor(k1=0, k2=0; k1 < 1024, k2<1024; k1++, k2++; 1, 1; 0, 0){
+  multifor(k1=0, k2=0; k1 < _PB_NI, k2<_PB_NI; k1++, k2++; 1, 1; 0, 0){
 0:{
       E[i1][j1]+=A[i1][k1]*B[k1][j1];
   }
