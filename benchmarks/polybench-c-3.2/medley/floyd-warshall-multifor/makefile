@@ -26,6 +26,9 @@ cleanall :
 	rm ./-D*
 	make clean
 
+test : floyd-warshall floyd-warshallmulti
+	(./floyd-warshall 2> ll; ./floyd-warshallmulti 2> lll; if ! diff ll lll; then echo "Les données diffèrent"; else echo "Les données sont les mêmes";fi;rm lll ll;make clean;)
+
 floyd-warshall.pocc : floyd-warshall.pocc.c floyd-warshall.h
 	$(CC) $(OPTI) $(OMP) $(INCLUDE) $(TIMER) $(DATASET) ../../utilities/polybench.c floyd-warshall.pocc.c -o floyd-warshall.pocc
 
