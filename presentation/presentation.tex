@@ -1,0 +1,185 @@
+\documentclass{beamer}
+\usetheme{Copenhagen}
+\mode<presentation>
+
+\usepackage{hyperref}
+%\usepackage[francais]{babel}
+%\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{beamerthemesplit}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+% ------------- BODY ----------------
+
+\title[From C loop nest to \texttt{multifor} loop nest]{Conversion of some well known polyhedral algorithms into his representation as a \texttt{multifor}
+}
+
+\author[Maxime Schmitt]{Maxime Schmitt \\ \scriptsize{maxime.schmitt@etu.unistra.fr}
+}
+
+\date{July 24, 2013}
+
+\institute[ICube]{
+    Department of Informatics \\
+        ICube laboratories \\
+        University of Strasbourg
+}
+
+\begin{document}
+
+%---- titlepage ------
+
+\begin{frame}
+\titlepage{}
+
+\centering{
+    \begin{tabular}{cc}
+
+    \begin{minipage}[t]{0.2\textwidth}
+    \includegraphics[width=\textwidth]{LOGOS/logoICube}
+    \end{minipage}
+    \begin{minipage}[t]{0.2\textwidth}
+    \includegraphics[width=\textwidth]{LOGOS/logo-uds-couleur-800433}
+    \end{minipage}
+
+    \end{tabular}
+}
+\end{frame}
+
+%------- slide -------
+
+\begin{frame}
+\frametitle{Overview of the talk}
+\tableofcontents{}
+\end{frame}
+
+%------- slide -------
+
+\section{\texttt{Multifor}, what for?}
+
+\subsection{The internship's goals}
+
+\begin{frame}
+\frametitle{What am I working on?}
+\begin{itemize}
+
+\item Conversion of the polyhedral benchmark into a \texttt{multifor} equivalence.
+\item Find out what are the limitations.
+
+\begin{itemize}
+
+\item What does the semantics not allow?
+\item Why can an algorithm be slower with the multifor than the sequential one?
+\item Is it esay to take an existing algorithm and translate it into multifor?
+
+\end{itemize}
+
+\item Use IBB to convert multifor code to C source code and test it.
+
+\end{itemize}
+\end{frame}
+
+%---------- frame -----------
+\subsection{The \texttt{multifor} objectives}
+
+\begin{frame}
+\frametitle{Control/Task parallelism}
+
+The \texttt{multifor} is based on control parallelism. \\
+        Control parallelism consist on distributing sequential process across different parallel node, in oposition with data parallelism where you have a sequential code of parallel statements.
+
+        \begin{figure}[h!]
+
+        \centering
+        \begin{minipage}[t]{0.40\textwidth}
+
+        \centering
+        \includegraphics[width=\textwidth]{pictures/data-parallelism}
+        \caption{Data parallelism}
+
+        \end{minipage}~% ------- "~"  add space between figure -> ~ \quad \qquad
+        \begin{minipage}[t]{0.40\textwidth}
+
+        \centering
+        \includegraphics[width=\textwidth]{pictures/task-parallelism}
+        \caption{Control parallelism}
+
+        \end{minipage}
+
+        \end{figure}
+
+        \end{frame}
+
+        %--------------- frame ----------------
+
+        \begin{frame}
+        \frametitle{The aim of the \texttt{multifor}}
+
+        \begin{itemize}
+
+        \item In order to use more efficiently the resources of nowadays computers we have to work with appropriate tools.
+
+        \item The fact is that we already have lots of techniques to exhibit parallelism and optimize loops and wanted that not only compilers do that but programmers too.
+
+        \end{itemize}
+
+        \end{frame}
+
+        %-------------------- frame ----------------
+
+        \begin{frame}
+        \frametitle{Helping programmers}
+
+        \begin{itemize}
+
+        \item The programmer has only to worry about parallelizing and optimizing the code.
+        \item The \texttt{multifor} is only a control structure to simplify the implementation.
+        \item You can mix loop of different execution frequency and different starting point.
+
+        \end{itemize}
+
+        \end{frame}
+
+        \subsection{Syntax and semantics reminding}
+
+        \begin{frame}
+        \frametitle{Syntax}
+
+{\small $\begin{array}{l}
+    \bf{multifor}(int~{\color{red}i_0{=}0}, {\color{blue}i_1{=}0};
+            {\color{red}i_0{<}6}, {\color{blue}i_1{<}3};
+            {\color{red}i_0}++, {\color{blue}i_1}++;
+            {\color{red}1}, {\color{blue}2};
+            {\color{red}0}, {\color{blue}1})\{
+    \\
+        \quad{}\bf{multjfor}(jnt~{\color{red}j_0{=}0}, {\color{blue}j_1{=}0};
+                {\color{red}j_0{<}6}, {\color{blue}j_1{<}3};
+                {\color{red}j_0}++, {\color{blue}j_1}++;
+                {\color{red}1}, {\color{blue}2};
+                {\color{red}0}, {\color{blue}2})\{
+    \\
+        \qquad{}{\color{red}0:\{ statement[i_0][j_0]\ldots \}}
+    \\
+        \qquad{}{\color{blue}1:\{ statement[i_1][j_1]\ldots \}}
+    \\
+        \quad{}\}
+\\
+    \}
+\end{array}$}
+
+\centering{
+    \includegraphics[height=3.5cm]{pictures/referential_domain}
+}
+
+\end{frame}
+
+\begin{frame}
+
+
+
+\end{frame}
+
+\end{document}
