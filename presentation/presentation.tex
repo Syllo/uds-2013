@@ -225,10 +225,10 @@ Is implemented for parallel programming.
 %-------------- frame -------------------
 
 \section{From for to \texttt{mulifor}}
-\subsection{Eric's approach}
+\subsection{The game of life}
 
 \begin{frame}
-\frametitle{Game of life}
+\frametitle{Game of life rules}
 
 Rules:
 \begin{itemize}
@@ -290,11 +290,11 @@ Rules:
         ~multifor({\color{red}i=1}, {\color{blue}i2=1}; {\color{red}i<N-1}, {\color{blue}i2<N-1}; {\color{red}i++}, {\color{blue}i2++};{\color{red} 1}, {\color{blue}1}; {\color{red}0}, {\color{blue}3})\{ \\
             \quad{}multifor({\color{red}j=1}, {\color{blue}j2=1}; {\color{red}j<N-1}, {\color{blue}j2<N-1}; {\color{red}j++}, {\color{blue}j2++}; {\color{red}1}, {\color{blue}1}; {\color{red}0}, {\color{blue}0})\{ \\
 \qquad{}0:\{\\
-\qquad{}~~temp[i-1][j-1]= \\
-\qquad{}~~game\_of\_life(t[i][j],t[i-1][j],t[i-1][j-1],t[i-1][j+1], \\
-\qquad{}~~[i][j-1],[i][j+1],[i+1][j-1],[i+1][j],[i+1][j+1]); \\
+\qquad{}~~{\color{red}temp[i-1][j-1]=} \\
+\qquad{}~~{\color{red}game\_of\_life(t[i][j],t[i-1][j],t[i-1][j-1],t[i-1][j+1],} \\
+\qquad{}~~{\color{red}[i][j-1],[i][j+1],[i+1][j-1],[i+1][j],[i+1][j+1]);} \\
 \qquad{}\} \\
-\qquad{}1:  t[i2][j2]=temp[i2-1][j2-1]; \\
+\qquad{}1:~~{\color{blue}t[i2][j2]=temp[i2-1][j2-1];} \\
            \quad{}\} \\
         ~\} \\
     \} \\
@@ -302,6 +302,204 @@ Rules:
 
     \end{array}$
 }
+
+\end{frame}
+
+%--------------- frame ----------------
+
+\begin{frame}
+\frametitle{Using ISL}
+
+After expressing the loop in the referential domain we got:
+\begin{equation}
+\scriptsize{D1 := [N]\rightarrow{}[i,j,i,j]:1<=i<N-1, 1<=j<N-1}
+\end{equation}
+\begin{equation}
+\scriptsize{D2 := [N]\rightarrow{}[i2',j2,i2,j2] : i2'=i2+3, 1<=i2<N-1, 1<=j2<N-1}
+\end{equation}
+We give this two equations to ISL and we got the loops.
+
+\end{frame}
+
+%------------ frame ------ 
+
+\begin{frame}
+\frametitle{Loops obtained}
+
+{$\begin{array}{l}
+for(int~i=1; i<N-1; i++)\{ \\
+~for(int~j=1; j<N-1; j++)\{ \\
+\quad{}compute(i,j); \\
+\quad{}if(i>=4)\{ \\
+\qquad{}copie(i-3,j); \\
+\quad{}\} \\
+~\} \\
+\} \\
+for(int~i=\max(4, N-1); i<=N+1; i++)\{ \\
+~for(j=1; j<N-1; j++)\{ \\
+\quad{}copie(i-3,j); \\
+~\} \\
+\} \\
+\end{array}$
+}
+
+\end{frame}
+
+%------- frame -------
+
+\subsection{Two matrix multiplication}
+
+\begin{frame}
+\frametitle{The algorithme}
+
+{$\begin{array}{l}
+D= alpha\times{}A\times{}B\times{}C + beta\times{}D \\ \\
+for (int~i = 0; i < I; i++) \\
+~for (int~j = 0; j < J; j++)\{ \\
+\quad{}tmp[i][j] = 0; \\
+\quad{}for (k = 0; k < K; ++k) \\
+\qquad{}tmp[i][j] += alpha * A[i][k] * B[k][j]; \\
+~\} \\
+for (int~i = 0; i < I; i++) \\
+~for (int~j = 0; j < L; j++)\{ \\
+\quad{}D[i][j] *= beta; \\
+\quad{}for (k = 0; k < J; ++k) \\
+\qquad{}D[i][j] += tmp[i][k] * C[k][j]; \\
+~\}
+
+\end{array}$
+}
+\end{frame}
+
+% ------------- frame ------------
+
+\begin{frame}
+\frametitle{Dependency resolution}
+
+I used Philippe's api to display dependencies in order to write the \texttt{multifor} \\
+\centering
+\includegraphics[height=4cm]{pictures/2mm}
+
+\end{frame}
+
+%---------- frame ------------
+
+\begin{frame}
+\frametitle{Nested \texttt{multifor}}
+
+{\footnotesize$\begin{array}{l}
+multifor(i1=0, i2=0; i1< I, i2< I; i1++, i2++; 1, 1; 0, {\color{red}1})\{ \\
+~multifor(j1=0, j2=0; j1< J, j2< L; j1++, j2++; 1, 1; 0, 0)\{ \\
+\quad{}0:\{ \\
+\qquad{}tmp[i1][j1]=0; \\
+\quad{}\} \\
+\quad{}1:\{ \\
+\qquad{}D[i2][j2]*=beta; \\
+\quad{}\} \\
+\quad{}multifor(k1=0, k2=0; k1< K, k2< J; k1++, k2++; 1, 1; 0, 0)\{ \\
+\qquad{}0:\{ \\
+\qquad{}~~tmp[i1][j1]+=alpha* A[i1][k1]* B[k1][j1]; \\
+\qquad{}\} \\
+\qquad{}1:\{ \\
+\qquad{}~~D[i2][j2]+= tmp[i2][k2] * C[k2][j2]; \\
+\qquad{}\} \\
+\quad{}\} \\
+~\} \\
+\}
+\end{array}$
+}
+
+\end{frame}
+
+%--------- frame ---------
+
+\begin{frame}
+\frametitle{Referential domain}
+
+\centering{
+\includegraphics[height=5cm]{pictures/2mmdomain}
+}
+
+\end{frame}
+
+%------------ frame ------------
+
+\subsection{Tree matrix multiplication}
+
+\begin{frame}
+\frametitle{Algorithm}
+
+\only<1>{
+$E = A\times{}B $
+$\begin{array}{l}
+for (i = 0; i < I; i++) \\
+~for (j = 0; j < I; j++)\{ \\
+\quad{}E[i][j] = 0; \\
+\quad{}for (k = 0; k < I; ++k) \\
+\qquad{}E[i][j] += A[i][k] * B[k][j]; \\
+~\}
+\end{array}$
+}
+\only<2>{
+$F = C\times{}D $
+$\begin{array}{l}
+for (i = 0; i < I; i++) \\
+~for (j = 0; j < I; j++)\{ \\
+\quad{}F[i][j] = 0; \\
+\quad{}for (k = 0; k < I; ++k) \\
+\qquad{}F[i][j] += C[i][k] * D[k][j]; \\
+~\}
+\end{array}$
+}
+\only<3>{
+$G = E\times{}F$
+$\begin{array}{l}
+for (i = 0; i < I; i++) \\
+~for (j = 0; j < I; j++)\{ \\
+\quad{}G[i][j] = 0; \\
+\quad{}for (k = 0; k < I; ++k) \\
+\qquad{}G[i][j] += E[i][k] * F[k][j]; \\
+~\}
+\end{array}$
+}
+
+\end{frame}
+
+%--------- frame ---------
+
+\begin{frame}
+\frametitle{Dependencies}
+
+\only<1>{
+    How E is calculated \newline{} \\
+    \centering
+    \includegraphics[height=2.5cm]{pictures/3mmdomain1}
+}
+
+\only<2>{
+How F is calculated \newline{} \\
+\centering{
+\includegraphics[height=2.5cm]{pictures/3mmdomain2}
+}
+}
+
+\only<3>{
+How G is calculated \newline{} \\
+\centering{
+\includegraphics[height=2.5cm]{pictures/3mmdomain3}
+}
+}
+
+\end{frame}
+
+%-------- frame --------
+
+\begin{frame}
+\frametitle{Can not express a base change}
+
+The \texttt{multifor} expression is :
+
+
 
 \end{frame}
 
