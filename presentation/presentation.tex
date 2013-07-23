@@ -4,7 +4,7 @@
 
 \usepackage{hyperref}
 %\usepackage[francais]{babel}
-%\usepackage[T1]{fontenc}
+\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{beamerthemesplit}
 \usepackage{graphicx}
@@ -15,7 +15,7 @@
 
 % ------------- BODY ----------------
 
-\title[From C loop nest to \texttt{multifor} loop nest]{Conversion of some well known polyhedral algorithms into his representation as a \texttt{multifor}
+\title[From C loop nest to \texttt{multifor} loop nest]{Writing some well known algorithms using a \texttt{multifor}
 }
 
 \author[Maxime Schmitt]{Maxime Schmitt \\ \scriptsize{maxime.schmitt@etu.unistra.fr}
@@ -37,10 +37,10 @@
 \titlepage{}
 
 \tiny{
-\begin{tabular}{|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline
-\bf{Philippe Clauss} & \bf{Imèn Fassi} & \bf{Eric Violard} \\
-The multifor designer & Working on IBB & Working on the semantic \\
+\bf{Philippe Clauss} & \bf{Imèn Fassi} & \bf{Eric Violard} & \bf{Louis-Noel Pouchet}\\
+The multifor designer & Working on IBB & Working on semantics & Wrote the PolyBench \\
 \hline
 \end{tabular}
 }
@@ -75,18 +75,18 @@ The multifor designer & Working on IBB & Working on the semantic \\
 \frametitle{What am I working on?}
 \begin{itemize}
 
-\item Conversion of the polyhedral benchmark into a \texttt{multifor} equivalence.
+\item Translation of the polyhedral benchmark into a \texttt{multifor} equivalence.
 \item Find out what are the limitations.
 
 \begin{itemize}
 
 \item What does the semantics not allow?
 \item Why can an algorithm be slower with the multifor than the sequential one?
-\item Is it esay to take an existing algorithm and translate it into multifor?
+\item Is it easy to take an existing algorithm and translate it into multifor?
 
 \end{itemize}
 
-\item Use IBB to convert multifor code to C source code and test it.
+\item Use IBB to convert multifor code to C and test it.
 
 \end{itemize}
 \end{frame}
@@ -98,7 +98,7 @@ The multifor designer & Working on IBB & Working on the semantic \\
 \frametitle{Control/Task parallelism}
 
 The \texttt{multifor} is based on control parallelism. \newline
-Control parallelism consist on distributing sequential process across different parallel node, in oposition with data parallelism where you have a sequential code of parallel statements.
+Control parallelism consists on distributing sequential process across different parallel node, in opposition with data parallelism where you have a sequential code on parallel data structures.
 
 \begin{figure}[h]
 
@@ -151,7 +151,7 @@ Example: HPF (High performance Fortran)
 
 \item The programmer has only to worry about parallelizing and optimizing the code.
 \item The \texttt{multifor} is only a control structure to simplify the implementation.
-\item You can mix loop of different execution frequency and different starting point.
+\item You can mix loops of different execution frequency and different starting point.
 
 \end{itemize}
 
@@ -224,7 +224,7 @@ Is implemented for parallel programming.
 
 %-------------- frame -------------------
 
-\section{From for to \texttt{mulifor}}
+\section{From for to \texttt{multifor}}
 \subsection{The game of life}
 
 \begin{frame}
@@ -242,7 +242,7 @@ Rules:
 %------------- frame -------------
 
 \begin{frame}
-\frametitle{The game of life algorithm}
+\frametitle{The game of life code}
 
 {$\begin{array}{l}
 
@@ -282,7 +282,7 @@ Rules:
 %------------------- frame -------------------
 
 \begin{frame}
-\frametitle{The same algorithm as \texttt{mulifor}}
+\frametitle{The same algorithm written with a \texttt{mulifor}}
 
 {$\begin{array}{l}
 
@@ -324,7 +324,7 @@ We give this two equations to ISL and we got the loops.
 %------------ frame ------ 
 
 \begin{frame}
-\frametitle{Loops obtained}
+\frametitle{The obtained loops}
 
 {$\begin{array}{l}
 for(int~i=1; i<N-1; i++)\{ \\
@@ -350,7 +350,7 @@ for(int~i=\max(4, N-1); i<=N+1; i++)\{ \\
 \subsection{Two matrix multiplication}
 
 \begin{frame}
-\frametitle{The algorithme}
+\frametitle{The algorithm}
 
 {$\begin{array}{l}
 D= alpha\times{}A\times{}B\times{}C + beta\times{}D \\ \\
@@ -472,8 +472,9 @@ for (i = 0; i < I; i++) \\
 
 \only<1>{
     How E is calculated \newline{} \\
-    \centering
+    \centering{
     \includegraphics[height=2.5cm]{pictures/3mmdomain1}
+    }
 }
 
 \only<2>{
@@ -484,7 +485,8 @@ How F is calculated \newline{} \\
 }
 
 \only<3>{
-How G is calculated \newline{} \\
+How G is calculated \\
+The order of the computation is not important within the ``V'' structure \\
 \centering{
 \includegraphics[height=2.5cm]{pictures/3mmdomain3}
 }
@@ -495,11 +497,151 @@ How G is calculated \newline{} \\
 %-------- frame --------
 
 \begin{frame}
-\frametitle{Can not express a base change}
+\frametitle{Base change}
 
-The \texttt{multifor} expression is :
+Whith two loop nest you can express the \texttt{multifor} like this:
+\newline{} \newline{}
+\begin{math}
+\begin{cases}
+x'=gx+o \\
+y'=g_x y + o_x + g'x+o'
+\end{cases}
+\end{math} \newline \newline
+But by making an \begin{math}\frac{\pi}{4}\end{math} rotation we get this expression \newline \newline
+\begin{math}
+\begin{cases}
+x'= x+y \\
+y'=y-x
+\end{cases}
+\end{math}\newline \newline 
+So it is impossible to express this rotation with the \texttt{multifor} semantics for now
+
+\end{frame}
+
+%------- frame --------
+
+\begin{frame}
+\frametitle{\texttt{Multifor} representation}
+\only<1>{
+So I made a function to calculate the ``V'' structure in function of a given row \newline{} \\
+\footnotesize{$\begin{array}{l}
+void~calculation(int~i, int~I, double *G,double *E, double*F,\\
+~int~bool)\{ \\
+\quad{}for(int~ibis=i, jbis=-i; jbis<-i+I; ibis++, jbis++)\{ \\
+\qquad{}int~ibase=(ibis-jbis)/2, jbase=(ibis+jbis)/2; \\
+\qquad{}if( (bool~\&\&~jbis<=0)~||~(!bool~\&\&~jbis>0))\{ \\
+\qquad{}~~G[ibase][jbase]=0; \\
+\qquad{}~~for(int k=0; k<I; k++)\{ \\
+\qquad{}\quad{}~~G[ibase][jbase]+=E[ibase][k]* F[k][jbase]; \\
+\qquad{}~~\} \\
+\qquad{}\}\\
+\quad{}\}\\
+~\}\\
+\end{array}$
+}
+}
+\only<2>{
+This is the multifor related \newline{} \\
+\footnotesize{$\begin{array}{l}
+multifor(i1=0, i2=0, {\color{red}i3=0}, {\color{blue}i4=0}; i1<I, i2<I, {\color{red}i3<I}, {\color{blue}i4<I};\\
+~~~i1++, i2++, {\color{red}i3++}, {\color{blue}i4++}; 1, 1, {\color{red}1}, {\color{blue}1}; 0, 0, {\color{red}-1}, {\color{blue}1})\{ \\
+~2: calculation(i3,I,G,E,F,{\color{red}0});\\
+~3: calculation(i4,I,G,E,F,{\color{blue}1});\\
+~multifor(j1=0, j2=0; j1 < I, j2<I; j1++, j2++;1, 1; 0, 0)\{ \\
+\quad{}0: E[i1][j1]=0; \\
+\quad{}1: F[j2][i2]=0;\\
+\quad{}multifor(k1=0, k2=0; k1 < I, k2<I; k1++, k2++; 1, 1; 0, 0)\{ \\
+\qquad{}0: E[i1][j1]+=A[i1][k1]*B[k1][j1]; \\
+\qquad{}1: F[j2][i2]+=C[j2][k2]*D[k2][i2]; \\
+\quad{}\}\\
+~\}\\
+\}\\
+\end{array}$
+}
+}
 
 
+\end{frame}
+
+%------------ frame -----------
+\subsection{Floyd-Warshall}
+
+\begin{frame}
+\frametitle{The algorithm}
+This algorithm repeats N times the same job on a NxN matrix\newline \\
+{$\begin{array}{l}
+for (k = 0; k < N; k++)\{ \\
+~for(i = 0; i < N; i++) \\
+\quad{}for (j = 0; j < N; j++) \\
+\qquad{}path[i][j] = path[i][j] < path[i][k] + path[k][j]~? \\
+\qquad{}path[i][j] : path[i][k] + path[k][j]; \\
+\} \\
+\end{array}$
+}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Referential domain}
+
+\centering
+\includegraphics[height=4cm]{pictures/floyd-warshall-domain}
+
+\end{frame}
+
+%------------ frame ---------
+
+\begin{frame}
+\frametitle{\texttt{Multifor} algorithm}
+\scriptsize{$\begin{array}{l}
+for(int~k=0; k< N; k++)\{ \\
+~multifor(i1=0,i2=0,j3=0; i1<k+1, i2<k+1, j3<k+1;\\
+~~i1++,i2++,j3++; 1,1,1; 0,1,1)\{ \\
+\quad{}0: mult1(i1, path, k); \\
+\quad{}1: mult2(i2,path,k); \\
+\quad{}2: mult3(j3,path,n,k); \\
+~\} \\
+~for(int i=k+1; i<n;i++)\{ \\
+\quad{}for(int j=k+1;j<n;j++)\{ \\
+\qquad{}path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j]; \\
+\quad{}\} \\
+~\} \\
+\}
+\end{array}$
+}
+\end{frame}
+
+%---------------- frame -------------
+
+\section{Benchmark}
+
+\begin{frame}
+\frametitle{Two matrix}
+\centering
+%\includegraphics[height=5cm]{pictures/2mmbench}
+
+\end{frame}
+
+%----------- frame -----------
+
+\begin{frame}
+\frametitle{Tree matrix}
+\centering
+\includegraphics[height=5cm]{pictures/3mmbench}
+\end{frame}
+
+% ---------- frame ---------
+
+\subsection{Tools used}
+
+\begin{frame}
+\frametitle{Tools}
+
+The polybench can be found on http://www.cse.ohio-state.edu/$\sim$pouchet/software/polybench/ and belongs to Louis-Noel Pouchet. The documentation is included in the archive. \\
+ISL was used with an online interface that you can found here: http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi \\
+IBB uses C code as input which can include a multifor and produces a C code that can be compiled. For more information ask Imèn Fassi at fassi.imen@gmail.com \\
+ClooG is used in both IBB and ISL. For more informations please visit the web site www.cloog.org/ \\
+POCC is a compiler collection for C code to optimized C code. Please visit www.cs.ucla.edu/$\sim$pouchet/software/pocc/ for more informations. \\
 
 \end{frame}
 
