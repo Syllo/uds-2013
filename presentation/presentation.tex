@@ -376,7 +376,7 @@ for (int~i = 0; i < I; i++) \\
 \begin{frame}
 \frametitle{Dependency resolution}
 
-I used Philippe's api to display dependencies in order to write the \texttt{multifor} \\
+I used Philippe's api which use Graphviz to display dependencies in order to write the \texttt{multifor} \\
 \centering
 \includegraphics[height=4cm]{pictures/2mm}
 
@@ -390,19 +390,11 @@ I used Philippe's api to display dependencies in order to write the \texttt{mult
 {\footnotesize$\begin{array}{l}
 multifor(i1=0, i2=0; i1< I, i2< I; i1++, i2++; 1, 1; 0, {\color{red}1})\{ \\
 ~multifor(j1=0, j2=0; j1< J, j2< L; j1++, j2++; 1, 1; 0, 0)\{ \\
-\quad{}0:\{ \\
-\qquad{}tmp[i1][j1]=0; \\
-\quad{}\} \\
-\quad{}1:\{ \\
-\qquad{}D[i2][j2]*=beta; \\
-\quad{}\} \\
+\quad{}0: tmp[i1][j1]=0; \\
+\quad{}1: D[i2][j2]*=beta; \\
 \quad{}multifor(k1=0, k2=0; k1< K, k2< J; k1++, k2++; 1, 1; 0, 0)\{ \\
-\qquad{}0:\{ \\
-\qquad{}~~tmp[i1][j1]+=alpha* A[i1][k1]* B[k1][j1]; \\
-\qquad{}\} \\
-\qquad{}1:\{ \\
-\qquad{}~~D[i2][j2]+= tmp[i2][k2] * C[k2][j2]; \\
-\qquad{}\} \\
+\qquad{}0: tmp[i1][j1]+=alpha* A[i1][k1]* B[k1][j1]; \\
+\qquad{}1: D[i2][j2]+= tmp[i2][k2] * C[k2][j2]; \\
 \quad{}\} \\
 ~\} \\
 \}
@@ -424,7 +416,7 @@ multifor(i1=0, i2=0; i1< I, i2< I; i1++, i2++; 1, 1; 0, {\color{red}1})\{ \\
 
 %------------ frame ------------
 
-\subsection{Tree matrix multiplication}
+\subsection{Three matrix multiplication}
 
 \begin{frame}
 \frametitle{Algorithm}
@@ -526,10 +518,10 @@ So it is impossible to express this rotation with the \texttt{multifor} semantic
 So I made a function to calculate the ``V'' structure in function of a given row \newline{} \\
 \footnotesize{$\begin{array}{l}
 void~calculation(int~i, int~I, double *G,double *E, double*F,\\
-~int~bool)\{ \\
+~bool~b)\{ \\
 \quad{}for(int~ibis=i, jbis=-i; jbis<-i+I; ibis++, jbis++)\{ \\
 \qquad{}int~ibase=(ibis-jbis)/2, jbase=(ibis+jbis)/2; \\
-\qquad{}if( (bool~\&\&~jbis<=0)~||~(!bool~\&\&~jbis>0))\{ \\
+\qquad{}if( (b~\&\&~jbis<=0)~||~(!b~\&\&~jbis>0))\{ \\
 \qquad{}~~G[ibase][jbase]=0; \\
 \qquad{}~~for(int k=0; k<I; k++)\{ \\
 \qquad{}\quad{}~~G[ibase][jbase]+=E[ibase][k]* F[k][jbase]; \\
@@ -544,7 +536,7 @@ void~calculation(int~i, int~I, double *G,double *E, double*F,\\
 This is the multifor related \newline{} \\
 \footnotesize{$\begin{array}{l}
 multifor(i1=0, i2=0, {\color{red}i3=0}, {\color{blue}i4=0}; i1<I, i2<I, {\color{red}i3<I}, {\color{blue}i4<I};\\
-~~~i1++, i2++, {\color{red}i3++}, {\color{blue}i4++}; 1, 1, {\color{red}1}, {\color{blue}1}; 0, 0, {\color{red}-1}, {\color{blue}1})\{ \\
+~~~i1++, i2++, {\color{red}i3++}, {\color{blue}i4++}; 1, 1, {\color{red}1}, {\color{blue}1}; 0, 0, {\color{red}I}, {\color{blue}1})\{ \\
 ~2: calculation(i3,I,G,E,F,{\color{red}0});\\
 ~3: calculation(i4,I,G,E,F,{\color{blue}1});\\
 ~multifor(j1=0, j2=0; j1 < I, j2<I; j1++, j2++;1, 1; 0, 0)\{ \\
@@ -573,7 +565,7 @@ This algorithm repeats N times the same job on a NxN matrix\newline \\
 for (k = 0; k < N; k++)\{ \\
 ~for(i = 0; i < N; i++) \\
 \quad{}for (j = 0; j < N; j++) \\
-\qquad{}path[i][j] = path[i][j] < path[i][k] + path[k][j]~? \\
+\qquad{}path[i][j] = (path[i][j] < (path[i][k] + path[k][j]))~? \\
 \qquad{}path[i][j] : path[i][k] + path[k][j]; \\
 \} \\
 \end{array}$
@@ -603,7 +595,7 @@ for(int~k=0; k< N; k++)\{ \\
 ~\} \\
 ~for(int i=k+1; i<n;i++)\{ \\
 \quad{}for(int j=k+1;j<n;j++)\{ \\
-\qquad{}path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j]; \\
+\qquad{}path[i][j] = (path[i][j] < (path[i][k] + path[k][j])) ? path[i][j] : path[i][k] + path[k][j]; \\
 \quad{}\} \\
 ~\} \\
 \}
@@ -618,16 +610,18 @@ for(int~k=0; k< N; k++)\{ \\
 \begin{frame}
 \frametitle{Two matrix}
 \centering
-%\includegraphics[height=5cm]{pictures/2mmbench}
+\includegraphics[height=5cm]{pictures/2mmbench} \\
+CPU: Intel Xeon W3520 @ 2.67Ghz (8 threads)
 
 \end{frame}
 
 %----------- frame -----------
 
 \begin{frame}
-\frametitle{Tree matrix}
+\frametitle{Three matrix}
 \centering
-\includegraphics[height=5cm]{pictures/3mmbench}
+\includegraphics[height=5cm]{pictures/3mmbench} \\
+CPU: Intel Xeon W3520 @ 2.67Ghz (8 threads)
 \end{frame}
 
 % ---------- frame ---------
@@ -637,11 +631,11 @@ for(int~k=0; k< N; k++)\{ \\
 \begin{frame}
 \frametitle{Tools}
 
-The polybench can be found on http://www.cse.ohio-state.edu/$\sim$pouchet/software/polybench/ and belongs to Louis-Noel Pouchet. The documentation is included in the archive. \\
-ISL was used with an online interface that you can found here: http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi \\
-IBB uses C code as input which can include a multifor and produces a C code that can be compiled. For more information ask Imèn Fassi at fassi.imen@gmail.com \\
-ClooG is used in both IBB and ISL. For more informations please visit the web site www.cloog.org/ \\
-POCC is a compiler collection for C code to optimized C code. Please visit www.cs.ucla.edu/$\sim$pouchet/software/pocc/ for more informations. \\
+- The polybench can be found on \texttt{http://www.cse.ohio-state.edu/$\sim$pouchet/software/polybench/} and belongs to Louis-Noel Pouchet. The documentation is included in the archive. \\
+- ISL was used with an online interface that you can found here: \texttt{http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi} \\
+- IBB uses C code as input which can include a multifor and produces a C code that can be compiled. For more information ask Imèn Fassi at fassi.imen@gmail.com \\
+- ClooG is used in both IBB and ISL. \texttt{www.cloog.org/} \\
+POCC is a compiler collection for C code to optimized C code. \texttt{www.cs.ucla.edu/$\sim$pouchet/software/pocc/} \\
 
 \end{frame}
 
