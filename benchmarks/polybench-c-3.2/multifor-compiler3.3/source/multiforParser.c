@@ -1,0 +1,100 @@
+/*****************************************************************************
+*                                                                            *
+*                       Multifor-compiler                                    * 
+*                                                                            * 
+*                                                                            *
+*   Auteurs : Pr. Philippe CLAUSS & Imen FASSI                               *
+*   Première version : Octobre 2012                                          *
+*   Deuxième version : avril 2013                                            *
+*   Troisième version : mai 2013                                             *
+*   Description :                                                            * 
+*   Ce code permet de vérifier la syntaxe d'un "multifor"                    *
+*   et de le traduire en des "for" classiques                                *
+*   en utilisant l'outil Polyédrique Cloog                                   *
+*                                                                            *
+*****************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+char * Message;
+int maxRef=0;
+int oldmaxRef=0;
+
+void mise_en_forme(char *);
+int extraxt_and_parse (char *) ;
+
+int main(int argc, char** argv) {
+  printf("\n\n");
+  int okkk=1;
+  char *input=NULL;
+  input= malloc(300);
+  if (input == NULL) 
+  {  printf("L'allocation mémoire a échoué !\n");
+     exit(0);
+  }
+  char *output=NULL;
+  output= malloc(300);
+  if (output == NULL) 
+  {  printf("L'allocation mémoire a échoué !\n");
+     exit(0);
+  }
+if (argc==2 || argc==4)
+{  sprintf(input,"%s",argv[1]);   
+   if(argc==2)
+      sprintf(output,"a.out.c");
+   else
+   {  if ( strcmp(argv[2],"-o") && strcmp(argv[2],"-O") )
+      {  printf(" L'appel du Multifor-compiler se fait comme suit :\n ./IBB inputFile.c -o outputFile.c  ou  ./IBB inputFile.c\n\n\n");
+         okkk=0;
+      }
+      else
+         sprintf(output,"%s",argv[3]);
+   }
+}
+else
+{  printf(" L'appel du Multifor-compiler se fait comme suit :\n ./IBB inputFile.c -o outputFile.c  ou  ./IBB inputFile.c\n\n\n");
+   okkk=0;
+}
+
+// Copier le contenu de input dans source/InPut.c
+if (okkk)
+{  FILE *fichier = fopen( input, "r");
+   if (fichier == NULL)
+      printf("\nImpossible d'ouvrir le fichier %s ! \n\n",input);
+   else
+   {  
+     int c;
+      FILE *  monInput= fopen("_multifor_Compiler_IBB_InPut.c","w+");
+      while ((c = getc(fichier)) != EOF) 
+         fprintf(monInput,"%c",c);
+      fclose(fichier);
+      fclose(monInput);
+      Message=NULL;
+      Message= malloc(500);
+      if (Message == NULL) 
+      {  printf("L'allocation mémoire a échoué !\n");
+         exit(0);
+      }
+      sprintf(Message,"\n  Le résultat de la traduction est sauvegardé dans le fichier %s \n\n\n\t SUCCÈS \n\n\n",output); 
+      int av = strlen(Message); 
+      int found = extraxt_and_parse("_multifor_Compiler_IBB_InPut.c");
+      oldmaxRef+=maxRef+1;      
+      int ap = strlen(Message);
+      while (av==ap && found ) { // Pour traduire les multifor qui figurent comme instruction 
+         remove("_multifor_Compiler_IBB_InPut.c");
+         rename ("_multifor_Compiler_IBB_OutPut.c","_multifor_Compiler_IBB_InPut.c");
+         maxRef=0;
+         found = extraxt_and_parse("_multifor_Compiler_IBB_InPut.c");
+         if (found)
+            oldmaxRef+=maxRef+1;  
+         ap = strlen(Message);
+      } 
+      printf("%s",Message);
+      mise_en_forme(output);
+   }
+}
+return 1;
+}
+
+

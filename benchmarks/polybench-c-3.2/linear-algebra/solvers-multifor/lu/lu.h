@@ -17,7 +17,7 @@
 # ifndef N
 /* Define the possible dataset sizes. */
 #  ifdef MINI_DATASET
-#   define N 32
+#   define N 4
 #  endif
 
 #  ifdef SMALL_DATASET

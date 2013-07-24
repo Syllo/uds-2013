@@ -1,0 +1,119 @@
+/*****************************************************************************
+*                                                                            *
+*                       Multifor-compiler                                    * 
+*                                                                            * 
+*                                                                            *
+*   Auteurs : Pr. Philippe CLAUSS & Imen FASSI                               *
+*   Première version : Octobre 2012                                          *
+*   Deuxième version : avril 2013                                            *
+*   Troisième version : mai 2013                                             *
+*   Description :                                                            * 
+*   Ce code permet de vérifier la syntaxe d'un "multifor"                    *
+*   et de le traduire en des "for" classiques                                *
+*   en utilisant l'outil Polyédrique Cloog                                   *
+*                                                                            *
+*****************************************************************************/
+
+
+%{
+#include"y.tab.h"
+#include <stdlib.h>
+#include <glib.h>
+extern int nbErr;
+YYSTYPE yylval;
+char* nom ;
+char ordre [500];
+%}
+
+NBRR [0-9]+\.[0-9]+
+texte \"([^"])*\"
+Fleche "->"
+ET "&&"
+OU "||"
+BREAK  "break"
+FOR "for"
+IF    "if"
+ELSE  "else"
+DO  "do"
+WHILE "while"
+Switch "switch"
+Case "case"
+Default "default"
+Multifor "multifor"
+Pouv "("
+Pferm ")"
+Accouv "{"
+Accferm "}"
+CrochOuv "["
+CrochFerm "]"
+OpRel [<>]|"<="|">="|"=="|"!="
+OpAff "="
+Var [a-zA-Z_]([a-zA-Z_]|[0-9])*
+Entier [0-9]+
+Incr "++"
+Decr "--"
+Pvirg ";"
+Dpoint ":"
+Virg ","
+Plus "+"
+Moin "-"
+Div "/"
+Mod "%"
+Mul "*"
+Ajout "+="
+Sous "-="
+DivAff "/="
+MulAff "*="
+commentaire1  "/*""/"*([^*/]|"*"[^/]|[^*]"/")*"*"*"*/"
+commentaire2 "//".*"\n"
+instruction [0-9]+" "*":""{"?()*"}"?
+
+%%
+
+"\n"
+"\t"
+" " 
+{NBRR} { yylval.chaine=  strdup(yytext); return NBRR;}
+{texte} { yylval.chaine=  strdup(yytext); return texte;}
+{Fleche} {return Fleche;}
+{ET}  { return ET;}
+{OU} { return OU;}
+{FOR} {return FOR;}
+{BREAK} { return BREAK;}
+{IF}    { return IF;}
+{ELSE}  { return ELSE;}
+{DO} { return DO;}
+{WHILE} { return WHILE;}
+{Switch} { return Switch;}
+{Case} { return Case;}
+{Default} { return Default;}
+{Multifor} { return Multifor;}
+{Pouv} { return Pouv;}
+{Pferm} { return Pferm;}
+{Accouv} { return Accouv;}
+{Accferm} { return Accferm;}
+{CrochOuv} { yylval.chaine=  strdup(yytext); return CrochOuv;}
+{CrochFerm} { yylval.chaine=  strdup(yytext); return CrochFerm;}
+{OpRel} { yylval.chaine=  strdup(yytext); return OpRel;}
+{OpAff} { return OpAff;}
+{Var} {	yylval.chaine=  strdup(yytext);
+	return Var; }
+{Entier} { yylval.nombre=strdup(yytext); return Entier;}
+{Incr} { return Incr;}
+{Decr} { return Decr;}
+{Pvirg} { return Pvirg;}
+{Dpoint} { return Dpoint;}
+{Virg} { return Virg;}
+{Plus} { return Plus;}
+{Moin} { return Moin;}
+{Div} { return Div;}
+{Mod} { return Mod;}
+{Mul} { return Mul;}
+{Ajout} { return Ajout;}
+{Sous}  { return Sous;}
+{DivAff} { return DivAff;}
+{MulAff} { return MulAff;}
+{commentaire1} //{ECHO;}
+{commentaire2} //{ECHO;}
+
+%%
