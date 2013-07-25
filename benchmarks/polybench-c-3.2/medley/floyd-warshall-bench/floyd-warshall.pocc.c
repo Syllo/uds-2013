@@ -1,3 +1,4 @@
+#include <math.h>
 /**
  * floyd-warshall.c: This file is part of the PolyBench/C 3.2 test suite.
  *
@@ -48,61 +49,43 @@ void print_array(int n,
     fprintf (stderr, "\n");
 }
 
-static inline void mult1(int i, DATA_TYPE POLYBENCH_2D(path,N,N,n,n), int k){
-    for(int j=i; j<k; j++){
-        if(j!=i)
-            path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-        path[j][i] = path[j][i] < path[k][i] + path[j][k] ? path[j][i] : path[k][i] + path[j][k];
-    }
-}
-static inline void mult2(int i, DATA_TYPE POLYBENCH_2D(path,N,N,n,n), int n, int k){
-    for(int j=k+1; j< n; j++){
-        path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-    }
-}
-static inline void mult3(int j, DATA_TYPE POLYBENCH_2D(path,N,N,n,n), int n, int k){
-    for(int i=k+1; i< n; i++){
-        path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-    }
-}
-static inline int max(int a , int b){
-    return a>b ? a : b;
-}
+
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
     static
 void kernel_floyd_warshall(int n,
         DATA_TYPE POLYBENCH_2D(path,N,N,n,n))
 {
-    int i1, i2, j3;
+    int i, j, k;
 
+#ifdef ceild
+# undef ceild
+#endif
+#ifdef floord
+# undef floord
+#endif
+#ifdef max
+# undef max
+#endif
+#ifdef min
+# undef min
+#endif
+#define ceild(n,d)  ceil(((double)(n))/((double)(d)))
+#define floord(n,d) floor(((double)(n))/((double)(d)))
+#define max(x,y)    ((x) > (y)? (x) : (y))
+#define min(x,y)    ((x) < (y)? (x) : (y))
+  register int lbv, ubv, lb, ub, lb1, ub1, lb2, ub2;
+  register int c0, c1, c2;
 #pragma scop
-
-    for(int k=0; k< _PB_N; k++){
-        multifor(i1=0,i2=0,j3=0; i1<k+1, i2<k+1, j3<k+1; i1++,i2++,j3++; 1,1,1; 0,1,1){
-0:{
-      mult1(i1, path, k);
-  }
-1:{
-      mult2(i2,path, n, k);
-  }
-2:{
-      mult3(j3,path,n,k);
-  }
-        }
-    for(int i=k+1; i<n;i++){
-        for(int j=k+1;j<n;j++){
-            path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-        }
+if ((_PB_N >= 1)) {
+    for (c0 = 0; c0 <= (_PB_N + -1); c0++) {
+        for (c1 = 0; c1 <= (_PB_N + -1); c1++) {
+            for (c2 = 0; c2 <= (_PB_N + -1); c2++) {
+        path[c1][c2]=path[c1][c2]<path[c1][c0]+path[c0][c2]?path[c1][c2]:path[c1][c0]+path[c0][c2];
+      }
     }
-    }
-    //source code  for (k = 0; k < _PB_N; k++)
-    //source code  {
-    //source code      for(i = 0; i < _PB_N; i++)
-    //source code          for (j = 0; j < _PB_N; j++)
-    //source code              path[i][j] = path[i][j] < path[i][k] + path[k][j] ?
-    //source code                  path[i][j] : path[i][k] + path[k][j];
-    //source code  }
+  }
+}
 #pragma endscop
 
 }

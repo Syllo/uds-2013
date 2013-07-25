@@ -48,61 +48,32 @@ void print_array(int n,
     fprintf (stderr, "\n");
 }
 
-static inline void mult1(int i, DATA_TYPE POLYBENCH_2D(path,N,N,n,n), int k){
-    for(int j=i; j<k; j++){
-        if(j!=i)
-            path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-        path[j][i] = path[j][i] < path[k][i] + path[j][k] ? path[j][i] : path[k][i] + path[j][k];
-    }
-}
-static inline void mult2(int i, DATA_TYPE POLYBENCH_2D(path,N,N,n,n), int n, int k){
-    for(int j=k+1; j< n; j++){
-        path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-    }
-}
-static inline void mult3(int j, DATA_TYPE POLYBENCH_2D(path,N,N,n,n), int n, int k){
-    for(int i=k+1; i< n; i++){
-        path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-    }
-}
-static inline int max(int a , int b){
-    return a>b ? a : b;
-}
+
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
     static
 void kernel_floyd_warshall(int n,
         DATA_TYPE POLYBENCH_2D(path,N,N,n,n))
 {
-    int i1, i2, j3;
+    int i, j, k;
 
 #pragma scop
-
-    for(int k=0; k< _PB_N; k++){
-        multifor(i1=0,i2=0,j3=0; i1<k+1, i2<k+1, j3<k+1; i1++,i2++,j3++; 1,1,1; 0,1,1){
-0:{
-      mult1(i1, path, k);
-  }
-1:{
-      mult2(i2,path, n, k);
-  }
-2:{
-      mult3(j3,path,n,k);
-  }
-        }
-    for(int i=k+1; i<n;i++){
-        for(int j=k+1;j<n;j++){
-            path[i][j] = path[i][j] < path[i][k] + path[k][j] ? path[i][j] : path[i][k] + path[k][j];
-        }
+    for (k = 0; k < _PB_N; k++)
+    {
+#pragma omp parallel for
+        for(i = 0; i < k; i++)
+            for (j = 0; j < _PB_N; j++)
+                path[i][j] = path[i][j] < path[i][k] + path[k][j] ?
+                    path[i][j] : path[i][k] + path[k][j];
+        for (j = 0; j < _PB_N; j++)
+            path[k][j] = path[k][j] < path[k][k] + path[k][j] ?
+                path[k][j] : path[k][k] + path[k][j];
+#pragma omp parallel for
+        for(i = k+1; i < _PB_N; i++)
+            for (j = 0; j < _PB_N; j++)
+                path[i][j] = path[i][j] < path[i][k] + path[k][j] ?
+                    path[i][j] : path[i][k] + path[k][j];
     }
-    }
-    //source code  for (k = 0; k < _PB_N; k++)
-    //source code  {
-    //source code      for(i = 0; i < _PB_N; i++)
-    //source code          for (j = 0; j < _PB_N; j++)
-    //source code              path[i][j] = path[i][j] < path[i][k] + path[k][j] ?
-    //source code                  path[i][j] : path[i][k] + path[k][j];
-    //source code  }
 #pragma endscop
 
 }
