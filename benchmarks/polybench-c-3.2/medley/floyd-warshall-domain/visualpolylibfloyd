@@ -1,0 +1,8 @@
+C := { I| };
+
+P1 := {i,j,k,I | 0 <= i <= k, 0 <= j <= k, 0 <= k < I };
+P2 := {i,j,k,I | 0 <= i <= k, k+1 <= j < I, 0 <= k < I };
+P3 := {i,j,k,I | k+1 <= i < I, 0 <= j <=k , 0 <= k < I };
+P4 := {i,j,k,I | k+1 <= i < I, k+1 <= j < I , 0 <= k < I };
+
+initvisu(3,C);
