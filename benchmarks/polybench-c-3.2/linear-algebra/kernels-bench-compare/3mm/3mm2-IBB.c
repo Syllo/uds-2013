@@ -51,29 +51,31 @@ DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
   }
   fprintf (stderr, "\n");
 }
-//static inline int min(int a, int b){
-//    return a<b ? a: b;
-//}
-//static inline int max(int a, int b){
-//    return a>b ? a : b;
-//}
+static inline int min(int a, int b){
+  return a<b ? a: b;
+}
+static inline int max(int a, int b){
+  return a>b ? a : b;
+}
 /**
  * Sert au calcul de la matrice G qui est coupé en deux selon la diagonale, faisant deux matrices triangulaire.
  * Si boulien est égale à 0 calcul de la partie supérieure (qui doit être plié avec un grain de -1 ou calculé après que E et F soient entièrement calculé) et sinon la partie inférieure.
  * */
-static inline void calculatation(int i, int _PB_NI, 
+static inline void calculatation(int i, int _PB_NI,
 DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl),
 DATA_TYPE POLYBENCH_2D(E,NI,NJ,ni,nj),
-DATA_TYPE POLYBENCH_2D(F,NJ,NL,nj,nl),
-int boulien){
-  for(int ibis=i, jbis=-i; jbis<-i+_PB_NI; ibis++, jbis++){
-    int ibase=(ibis-jbis)/2, jbase=(ibis+jbis)/2;
-    if( boulien!=0 ? jbis<=0 : jbis>0){
-      G[ibase][jbase]=0;
-      for(int k=0; k<_PB_NI; k++){
-        G[ibase][jbase]+=E[ibase][k]* F[k][jbase];
-      }
+DATA_TYPE POLYBENCH_2D(F,NJ,NL,nj,nl)){
+  for(int j=0; j<i; j++){
+    G[i][j]=0;
+    G[j][i]=0;
+    for(int k=0;k<_PB_NI; k++){
+      G[i][j]+=E[i][k]*F[k][j];
+      G[j][i]+=E[j][k]*F[k][i];
     }
+  }
+  G[i][i]=0;
+  for(int k=0; k < _PB_NI; k++){
+    G[i][i]+=E[i][k]*F[k][i];
   }
 }
 /* Main computational kernel. The whole function will be timed,
@@ -88,7 +90,7 @@ DATA_TYPE POLYBENCH_2D(C,NJ,NM,nj,nm),
 DATA_TYPE POLYBENCH_2D(D,NM,NL,nm,nl),
 DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
 {
-  int i1, i2, ini, i3, j1, j2, k1, k2;
+  int i1, i2, i3, j1, j2, k1, k2;
   #pragma scop
   int _mfr_ref0; int _mfr_ref1; int _mfr_ref2; 
   if (ni >= 1) {
@@ -111,8 +113,8 @@ DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
       }
     }
     for (_mfr_ref0=1;_mfr_ref0<=ni-1;_mfr_ref0++) {    
-      ini=_mfr_ref0-1;
-      calculatation(ini,_PB_NI,G,E,F,1);
+      i3=_mfr_ref0-1;
+      calculatation(i3,ni,G,E,F);
       for (_mfr_ref1=0;_mfr_ref1<=ni-1;_mfr_ref1++) {    
         i1=_mfr_ref0;
         j1=_mfr_ref1;
@@ -132,14 +134,8 @@ DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
         }
       }
     }
-    i3=_mfr_ref0-ni;
-    calculatation(i3,_PB_NI,G,E,F,0);
-    ini=_mfr_ref0-1;
-    calculatation(ini,_PB_NI,G,E,F,1);
-    for (_mfr_ref0=ni+1;_mfr_ref0<=2*ni-1;_mfr_ref0++) {    
-      i3=_mfr_ref0-ni;
-      calculatation(i3,_PB_NI,G,E,F,0);
-    }
+    i3=_mfr_ref0-1;
+    calculatation(i3,ni,G,E,F);
   }
   //  multifor(i1=0, j2=0, nb_row_G=0; i1< _PB_NI, j2< _PB_NL, nb_row_G < _PB_NI; i1++, j2++, nb_row_G++; 1, 1,1; 0, 0, 1){
     //      multifor(j1=0, i2=0, i3=0; j1< _PB_NJ, i2< _PB_NJ, i3< i1; j1++, i2++, i3++; 1, 1, 1; 0, 0, 0){
@@ -196,14 +192,6 @@ DATA_TYPE POLYBENCH_2D(G,NI,NL,ni,nl))
                             //source code            }
                             #pragma endscop
                           }
-int min (int A, int B) {
- if (A<B) return A;
- else return B;
-}
-int max (int A, int B) {
- if (A>B) return A;
- else return B;
-}
 int main(int argc, char** argv)
 {
                             /* Retrieve problem size. */
